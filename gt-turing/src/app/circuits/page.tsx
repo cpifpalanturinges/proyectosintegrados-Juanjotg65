@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import DetailsModal from '@/components/DetailsModal';
 import { apiClient } from '@/lib/api-client';
 import { Circuit } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,6 +23,9 @@ export default function CircuitsPage() {
     minPrice: '',
     maxPrice: ''
   });
+
+  // Backend origin derived from NEXT_PUBLIC_API_URL (strip trailing /api)
+  const backendOrigin = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/api$/, '');
 
   useEffect(() => {
     loadCircuits();
@@ -70,7 +74,20 @@ export default function CircuitsPage() {
       minPrice: '',
       maxPrice: ''
     });
-    setTimeout(() => loadCircuits(), 100);
+    // Immediately reload circuits from API so clearing updates results reliably
+    (async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const data = await apiClient.getCircuits({});
+        setCircuits(data);
+      } catch (err: any) {
+        setError('Error al cargar los circuitos');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   };
 
   const provinces = Array.from(new Set(circuits.map(c => c.province))).sort();
@@ -93,6 +110,9 @@ export default function CircuitsPage() {
     }
   };
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalCircuit, setModalCircuit] = useState<Circuit | null>(null);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <Navbar />
@@ -101,14 +121,14 @@ export default function CircuitsPage() {
       <div className="bg-gradient-to-r from-orange-500 via-red-600 to-red-700 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center animate-fade-in-up">
-            <h1 className="text-6xl font-bold mb-4 tracking-tight">Nuestros Circuitos</h1>
+            <h1 className="text-6xl font-bold mb-4 tracking-tight">{t('circuits.title')}</h1>
             <p className="text-xl text-red-100 max-w-2xl mx-auto">
-              Experimenta la adrenalina en los mejores circuitos de España
+              {t('circuits.subtitle')}
             </p>
             <div className="mt-8 flex justify-center items-center space-x-4 text-sm">
               <div className="flex items-center space-x-2">
                 <span className="text-3xl">🏁</span>
-                <span>{circuits.length} Circuitos</span>
+                <span>{circuits.length} {t('circuits.count')}</span>
               </div>
               <span className="text-red-300">•</span>
               <div className="flex items-center space-x-2">
@@ -134,20 +154,20 @@ export default function CircuitsPage() {
                 <svg className="w-6 h-6 mr-2 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                Filtros
+                {t('circuits.filters')}
               </h2>
               
               <div className="space-y-6">
                 <div className="pb-6 border-b border-gray-200">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center">
                     <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                    Provincia
+                    {t('circuits.filterProvince')}
                   </label>
                   <select
                     name="province"
                     value={filters.province}
                     onChange={handleFilterChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-white hover:border-orange-300"
+                    className="w-full text-gray-900 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-white hover:border-orange-300"
                   >
                     <option value="">Todas</option>
                     {provinces.map(prov => (
@@ -159,42 +179,42 @@ export default function CircuitsPage() {
                 <div className="pb-6 border-b border-gray-200">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center">
                     <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                    Superficie
+                    {t('circuits.filterSurface')}
                   </label>
                   <select
                     name="surface"
                     value={filters.surface}
                     onChange={handleFilterChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-white hover:border-orange-300"
+                    className="w-full text-gray-900 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all bg-white hover:border-orange-300"
                   >
                     <option value="">Todas</option>
-                    <option value="Asphalt">🛣️ Asfalto</option>
-                    <option value="Concrete">🏗️ Hormigón</option>
-                    <option value="Mixed">🏁 Mixta</option>
+                    <option value="Asphalt">🛣️ {t('circuits.surface.asphalt')}</option>
+                    <option value="Concrete">🏗️ {t('circuits.surface.concrete')}</option>
+                    <option value="Mixed">🏁 {t('circuits.surface.mixed')}</option>
                   </select>
                 </div>
 
                 <div className="pb-6 border-b border-gray-200">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center">
                     <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                    Longitud (m)
+                    {t('circuits.filterLength')}
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
                       type="number"
                       name="minLength"
                       value={filters.minLength}
                       onChange={handleFilterChange}
                       placeholder="Mín"
-                      className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
+                      className="w-full text-gray-900 placeholder-gray-400 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
                     />
                     <input
                       type="number"
                       name="maxLength"
                       value={filters.maxLength}
                       onChange={handleFilterChange}
-                      placeholder="Máx"
-                      className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
+                      placeholder={t('circuits.max')}
+                      className="w-full text-gray-900 placeholder-gray-400 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
                     />
                   </div>
                 </div>
@@ -202,24 +222,24 @@ export default function CircuitsPage() {
                 <div className="pb-6 border-b border-gray-200">
                   <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center">
                     <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                    Precio/Hora (€)
+                    {t('circuits.filterPrice')}
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
                       type="number"
                       name="minPrice"
                       value={filters.minPrice}
                       onChange={handleFilterChange}
-                      placeholder="Mín"
-                      className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
+                      placeholder={t('circuits.min')}
+                      className="w-full text-gray-900 placeholder-gray-400 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
                     />
                     <input
                       type="number"
                       name="maxPrice"
                       value={filters.maxPrice}
                       onChange={handleFilterChange}
-                      placeholder="Máx"
-                      className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
+                      placeholder={t('circuits.max')}
+                      className="w-full text-gray-900 placeholder-gray-400 px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all hover:border-orange-300"
                     />
                   </div>
                 </div>
@@ -232,7 +252,7 @@ export default function CircuitsPage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Aplicar Filtros</span>
+                    <span>{t('circuits.apply')}</span>
                   </button>
                   <button
                     onClick={clearFilters}
@@ -241,7 +261,7 @@ export default function CircuitsPage() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    <span>Limpiar Filtros</span>
+                    <span>{t('circuits.clear')}</span>
                   </button>
                 </div>
               </div>
@@ -253,7 +273,7 @@ export default function CircuitsPage() {
             {loading ? (
               <div className="text-center py-16">
                 <LoadingSpinner size="lg" />
-                <p className="mt-4 text-gray-600 text-lg">Cargando circuitos...</p>
+                <p className="mt-4 text-gray-600 text-lg">{t('circuits.loading')}</p>
               </div>
             ) : error ? (
               <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center animate-fade-in">
@@ -263,19 +283,19 @@ export default function CircuitsPage() {
             ) : circuits.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center animate-fade-in">
                 <div className="text-6xl mb-3">🔍</div>
-                <p className="text-gray-700 text-lg font-medium">No se encontraron circuitos con los filtros aplicados</p>
+                <p className="text-gray-700 text-lg font-medium">{t('circuits.noResults')}</p>
                 <button
                   onClick={clearFilters}
                   className="mt-4 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
                 >
-                  Limpiar Filtros
+                  {t('circuits.clear')}
                 </button>
               </div>
             ) : (
               <>
                 <div className="mb-6 flex justify-between items-center">
                   <p className="text-gray-600">
-                    <span className="font-bold text-orange-500 text-lg">{circuits.length}</span> circuitos encontrados
+                    <span className="font-bold text-orange-500 text-lg">{circuits.length}</span> {t('circuits.found')}
                   </p>
                 </div>
 
@@ -286,12 +306,19 @@ export default function CircuitsPage() {
                       className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden transform hover:-translate-y-2 animate-fade-in-up"
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                      <div className="relative h-48 bg-gradient-to-br from-orange-500 via-red-600 to-red-800 flex items-center justify-center overflow-hidden">
+                      <div className="relative h-48 bg-gradient-to-br from-orange-500 via-red-600 to-red-800 overflow-hidden">
+                        {/* image fills header */}
+                        <img
+                          src={`${backendOrigin}${circuit.imageUrl}`}
+                          alt={circuit.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={e => { (e.currentTarget as HTMLImageElement).src = '/window.svg'; }}
+                        />
                         <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div className="text-center relative z-10">
-                          <div className="text-7xl mb-2 transform group-hover:scale-110 transition-transform duration-300">🏁</div>
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getSurfaceColor(circuit.surfaceType)}`}>
-                            {getSurfaceIcon(circuit.surfaceType)} {circuit.surfaceType}
+                        {/* centered surface badge */}
+                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10">
+                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getSurfaceColor(circuit.surfaceType)} bg-white/70 shadow-sm`}>
+                            {getSurfaceIcon(circuit.surfaceType)} {t(`circuits.surface.${circuit.surfaceType.toLowerCase()}`)}
                           </span>
                         </div>
                       </div>
@@ -313,13 +340,13 @@ export default function CircuitsPage() {
                           {circuit.numberOfCorners && (
                             <div className="flex items-center space-x-2">
                               <span className="text-lg">🎯</span>
-                              <span>{circuit.numberOfCorners} curvas</span>
+                              <span>{circuit.numberOfCorners} {t('circuits.corners')}</span>
                             </div>
                           )}
                           <div className="flex items-center space-x-2">
                             <span className="text-lg">{circuit.isAvailable ? '✅' : '🔒'}</span>
                             <span className={circuit.isAvailable ? 'text-green-600 font-medium' : 'text-red-600'}>
-                              {circuit.isAvailable ? 'Disponible' : 'No disponible'}
+                              {circuit.isAvailable ? t('circuits.available') : t('circuits.notAvailable')}
                             </span>
                           </div>
                         </div>
@@ -327,18 +354,18 @@ export default function CircuitsPage() {
                         <div className="border-t border-gray-100 pt-4 mt-4">
                           <div className="flex justify-between items-center">
                             <div>
-                              <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Consultar</span>
+                              <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">{t('circuits.consultPrice')}</span>
                               <span className="text-gray-600 text-xs block">precio</span>
                             </div>
-                            <Link
-                              href={`/circuits/${circuit.id}`}
+                            <button
+                              onClick={() => { setModalCircuit(circuit); setModalOpen(true); }}
                               className="group/btn bg-gradient-to-r from-orange-500 to-red-600 text-white px-5 py-2.5 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-1"
                             >
-                              <span>Ver Detalles</span>
+                              <span>{t('circuits.viewDetails')}</span>
                               <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
-                            </Link>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -352,6 +379,7 @@ export default function CircuitsPage() {
       </div>
 
       <Footer />
+      <DetailsModal open={modalOpen} onClose={() => setModalOpen(false)} circuit={modalCircuit} />
     </div>
   );
 }

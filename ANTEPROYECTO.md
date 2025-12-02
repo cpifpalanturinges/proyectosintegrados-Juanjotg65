@@ -1,153 +1,71 @@
-<div align="center">
+# ANTEPROYECTO – GT-TURING
 
-# 🏁 ANTEPROYECTO – GT-TURING 🏁
+## Sistema de Gestión y Reservas de Circuitos y Vehículos de Competición
 
-### 🏎️ *Sistema de Gestión y Reservas de Circuitos y Vehículos de Competición* 🏎️
-
----
-
-<img src="https://img.shields.io/badge/Estado-En%20Desarrollo-yellow?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Curso-2024%2F2025-blue?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Ciclo-DAW-green?style=for-the-badge" />
-
-</div>
+**Curso:** 2024/2025  
+**Ciclo:** Desarrollo de Aplicaciones Web  
+**Estado:** En Desarrollo
 
 ---
 
-## 👨‍💻 **AUTOR DEL PROYECTO**
+## AUTOR DEL PROYECTO
 
-<table>
-<tr>
-<td align="center" width="100%">
-<img src="https://github.com/identicons/juanjotg65.png" width="100px" style="border-radius: 50%"/><br/>
-<strong>Juan José Tejada Gutiérrez</strong><br/>
-<sub>Desarrollador Full Stack</sub><br/>
-<a href="https://github.com/cpifpalanturinges/proyectosintegrados-Juanjotg65">📁 Repositorio</a>
-</td>
-</tr>
-</table>
+**Juan José Tejada Gutiérrez**  
+Desarrollador Full Stack  
+[Repositorio GitHub](https://github.com/cpifpalanturinges/proyectosintegrados-Juanjotg65)
 
 ---
 
-## 🎯 **TÍTULO DEL PROYECTO**
+## TÍTULO DEL PROYECTO
 
-> ### **GT-TURING: Sistema de Gestión y Reservas de Circuitos y Vehículos de Competición**
-> 
-> *Una plataforma web moderna para conectar aficionados del automovilismo con circuitos y vehículos de alto rendimiento*
+**GT-TURING: Sistema de Gestión y Reservas de Circuitos y Vehículos de Competición**
 
----
-
-## 🎯 **OBJETIVOS DEL PROYECTO**
-
-### 🌟 Objetivo General
-
-```
-Desarrollar una plataforma web completa para la gestión y reserva de circuitos 
-automovilísticos y vehículos de competición, que permita a los usuarios explorar 
-circuitos disponibles, consultar el catálogo de vehículos y realizar reservas de 
-forma intuitiva, con un panel de administración, sistema de chat en tiempo real 
-e internacionalización.
-```
-
-### 📌 Objetivos Específicos
-
-<table>
-<tr>
-<td width="50px" align="center">🔐</td>
-<td><strong>Autenticación Segura:</strong> Implementar sistema basado en JWT con roles diferenciados (Usuario y Administrador)</td>
-</tr>
-<tr>
-<td width="50px" align="center">🌐</td>
-<td><strong>API REST Documentada:</strong> Diseñar servicios completos para gestión de usuarios, vehículos, circuitos y reservas</td>
-</tr>
-<tr>
-<td width="50px" align="center">🎨</td>
-<td><strong>Interfaz Moderna:</strong> Crear diseño responsive e intuitivo con Next.js y Tailwind CSS</td>
-</tr>
-<tr>
-<td width="50px" align="center">💬</td>
-<td><strong>Chat en Tiempo Real:</strong> Integrar comunicación instantánea mediante WebSockets (SignalR)</td>
-</tr>
-<tr>
-<td width="50px" align="center">🌍</td>
-<td><strong>Internacionalización:</strong> Implementar i18n completo con soporte para español e inglés</td>
-</tr>
-<tr>
-<td width="50px" align="center">⚙️</td>
-<td><strong>Panel de Administración:</strong> Desarrollar gestión completa de contenidos, usuarios y reservas</td>
-</tr>
-<tr>
-<td width="50px" align="center">🛡️</td>
-<td><strong>Seguridad:</strong> Garantizar validación de datos en frontend y backend</td>
-</tr>
-<tr>
-<td width="50px" align="center">☁️</td>
-<td><strong>Despliegue en la Nube:</strong> Implementar en AWS con HTTPS y base de datos SQL Server</td>
-</tr>
-</table>
-
-
+Una plataforma web para conectar aficionados del automovilismo con circuitos y vehículos de alto rendimiento.
 
 ---
 
-## 💡 **TEMÁTICA Y CONCEPTO**
+## OBJETIVOS DEL PROYECTO
 
-<div align="center">
+### Objetivo General
 
-### 🏁 *Mundo del Motor y la Competición Automovilística* 🏁
+Desarrollar una plataforma web completa para la gestión y reserva de circuitos automovilísticos y vehículos de competición, que permita a los usuarios explorar circuitos disponibles, consultar el catálogo de vehículos y realizar reservas de forma intuitiva, con un panel de administración, sistema de chat en tiempo real e internacionalización.
 
-</div>
+### Objetivos Específicos
 
-El proyecto está centrado en el **mundo del motor y la competición automovilística**, ofreciendo una plataforma digital donde los usuarios pueden:
-
-- 🏎️ **Reservar circuitos** de prestigio internacional
-- 🚗 **Alquilar vehículos** de alto rendimiento (GT, Fórmula, Prototipos)
-- 📅 **Gestionar reservas** de forma intuitiva
-- 💬 **Comunicarse** en tiempo real con otros usuarios
-- 🌍 **Acceder** en español e inglés
-
-El diseño está **inspirado en la velocidad, el rendimiento y la precisión** del automovilismo, combinando:
-- ⚡ Gestión administrativa eficiente
-- 🎯 Reservas online simplificadas
-- 🔔 Comunicación instantánea
-- 🎨 Interfaz visualmente atractiva
+- **Autenticación Segura:** Implementar sistema basado en JWT con roles diferenciados (Usuario y Administrador)
+- **API REST Documentada:** Diseñar servicios completos para gestión de usuarios, vehículos, circuitos y reservas
+- **Interfaz Moderna:** Crear diseño responsive e intuitivo con Next.js y Tailwind CSS
+- **Chat en Tiempo Real:** Integrar comunicación instantánea mediante WebSockets (SignalR)
+- **Internacionalización:** Implementar soporte para español e inglés
+- **Panel de Administración:** Desarrollar gestión completa de contenidos, usuarios y reservas
+- **Seguridad:** Garantizar validación de datos en frontend y backend
+- **Despliegue en la Nube:** Implementar en AWS con HTTPS
 
 ---
 
-## 💻 **TECNOLOGÍAS UTILIZADAS**
+## TEMÁTICA Y CONCEPTO
 
-### 🎨 **Frontend - Interfaz de Usuario**
+El proyecto está centrado en el mundo del motor y la competición automovilística, ofreciendo una plataforma digital donde los usuarios pueden:
 
-<table>
-<tr>
-<th width="150px">Tecnología</th>
-<th>Descripción</th>
-<th width="80px">Versión</th>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white" /></td>
-<td>Framework de React con App Router y SSR</td>
-<td align="center">15.5.4</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black" /></td>
-<td>Librería para construcción de interfaces</td>
-<td align="center">19.1.0</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white" /></td>
-<td>Superset tipado de JavaScript</td>
-<td align="center">5</td>
-</tr>
-<tr>
-<td><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white" /></td>
-<td>Framework de utilidades CSS + CSS3 custom</td>
-<td align="center">4</td>
-</tr>
-<tr>
-<td>🔌 <strong>WebSocket</strong></td>
-<td>Comunicación en tiempo real (nativo, sin librerías)</td>
-<td align="center">-</td>
+- Reservar circuitos de prestigio
+- Alquilar vehículos de alto rendimiento
+- Gestionar reservas de forma intuitiva
+- Comunicarse en tiempo real con administradores
+- Acceder en español e inglés
+
+---
+
+## TECNOLOGÍAS UTILIZADAS
+
+### Frontend
+
+| Tecnología | Descripción | Versión |
+|------------|-------------|---------|
+| Next.js | Framework de React con App Router | 15.5.4 |
+| React | Librería para construcción de interfaces | 19.1.0 |
+| TypeScript | Superset tipado de JavaScript | 5 |
+| Tailwind CSS | Framework de utilidades CSS | 4 |
+| WebSocket | Comunicación en tiempo real | - |
 </tr>
 <tr>
 <td>📦 <strong>Context API</strong></td>
@@ -229,107 +147,228 @@ El diseño está **inspirado en la velocidad, el rendimiento y la precisión** d
 
 
 ---
+| Context API | Gestión de estado global | - |
 
-## 🗄️ **ESQUEMA E/R DE LA BASE DE DATOS**
+### Backend
 
-### 📊 Modelo Entidad-Relación
+| Tecnología | Descripción | Versión |
+|------------|-------------|---------|
+| C# / .NET | Framework de desarrollo backend | 8.0 |
+| ASP.NET Core | API RESTful | 8.0 |
+| Entity Framework Core | ORM para acceso a datos | 8.0 |
+| SignalR | WebSockets para chat en tiempo real | 8.0 |
+| JWT | Autenticación basada en tokens | - |
+| SQLite | Base de datos durante desarrollo | - |
 
-```
-┌─────────────────────┐
-│       USERS         │
-├─────────────────────┤
-│ 🆔 Id (PK)         │
-│ 👤 FirstName       │
-│ 👤 LastName        │
-│ 📧 Email (UNIQUE)  │
-│ 📱 Phone           │
-│ 🔒 PasswordHash    │
-│ 🎭 Role            │
-│ 📅 CreatedAt       │
-└─────────────────────┘
-         │
-         │ 1:N
-         ▼
-┌─────────────────────┐         ┌─────────────────────┐
-│   RESERVATIONS      │    N:1  │      CIRCUITS       │
-├─────────────────────┤◄────────├─────────────────────┤
-│ 🆔 Id (PK)         │         │ 🆔 Id (PK)         │
-│ 👤 UserId (FK)     │         │ 🏁 Name            │
-│ 🏁 CircuitId (FK)  │         │ 📍 Location        │
-│ 🚗 CarId (FK)      │         │ 📏 Length          │
-│ 📅 Date            │         │ 🔄 TurnsCount      │
-│ ⏰ TimeSlot        │         │ ⏱️ LapRecord       │
-│ 📊 Status          │         │ 🎚️ Difficulty      │
-│ 📅 CreatedAt       │         │ 📝 Description     │
-└─────────────────────┘         │ 🖼️ ImageUrl        │
-         │                      │ 💰 PricePerHour    │
-         │ N:1                  └─────────────────────┘
-         ▼
-┌─────────────────────┐
-│        CARS         │
-├─────────────────────┤
-│ 🆔 Id (PK)         │
-│ 🏷️ Brand           │
-│ 🚗 Model           │
-│ 📅 Year            │
-│ 🏎️ Category        │
-│ ⚡ Power           │
-│ ⚙️ Transmission    │
-│ 💰 PricePerHour    │
-│ 📝 Description     │
-│ 🖼️ ImageUrl        │
-│ ✅ IsAvailable     │
-└─────────────────────┘
+### Herramientas
 
+- Git/GitHub para control de versiones
+- Visual Studio Code
+- Postman para pruebas de API
+- Figma para diseño de interfaces
 
-┌─────────────────────┐         ┌─────────────────────┐
-│   CONVERSATIONS     │    1:N  │      MESSAGES       │
-├─────────────────────┤◄────────├─────────────────────┤
-│ 🆔 Id (PK)         │         │ 🆔 Id (PK)         │
-│ 👤 User1Id (FK)    │         │ 💬 ConversationId  │
-│ 👤 User2Id (FK)    │         │ 👤 SenderId (FK)   │
-│ 📅 CreatedAt       │         │ 📝 Content         │
-│ 📅 UpdatedAt       │         │ ⏰ SentAt          │
-└─────────────────────┘         │ ✅ IsRead          │
-                                └─────────────────────┘
-```
+---
 
-### 📋 Descripción de Entidades
+## ESQUEMA E/R DE LA BASE DE DATOS
 
-<table>
-<tr>
-<th width="150px">Entidad</th>
-<th>Descripción</th>
-<th>Relaciones</th>
-</tr>
-<tr>
-<td>👥 <strong>Users</strong></td>
-<td>Almacena usuarios con roles (User/Admin)</td>
-<td>1:N con Reservations, Messages</td>
-</tr>
-<tr>
-<td>🏁 <strong>Circuits</strong></td>
-<td>Catálogo de circuitos disponibles</td>
-<td>1:N con Reservations</td>
-</tr>
-<tr>
-<td>🚗 <strong>Cars</strong></td>
-<td>Inventario de vehículos por categoría</td>
-<td>1:N con Reservations</td>
-</tr>
-<tr>
-<td>📅 <strong>Reservations</strong></td>
-<td>Gestión de reservas (Pending/Confirmed/Cancelled/Completed)</td>
-<td>N:1 con Users, Circuits, Cars</td>
-</tr>
-<tr>
-<td>💬 <strong>Conversations</strong></td>
-<td>Hilos de chat entre usuarios</td>
-<td>1:N con Messages</td>
-</tr>
-<tr>
-<td>📧 <strong>Messages</strong></td>
-<td>Mensajes individuales del chat</td>
+### Entidades Principales
+
+**USERS**
+- Id (PK)
+- FirstName
+- LastName  
+- Email (UNIQUE)
+- Phone
+- PasswordHash
+- Role (User/Admin)
+- IsBlocked
+- CreatedAt
+- UpdatedAt
+
+**CARS**
+- Id (PK)
+- Brand
+- Model
+- Year
+- Type (Racing/Drift/Hybrid)
+- Power
+- PricePerDay
+- Status (Available/Rented/Maintenance)
+- Description
+- ImageUrl
+- CreatedAt
+- UpdatedAt
+
+**CIRCUITS**
+- Id (PK)
+- Name
+- Location
+- Province
+- LengthMeters
+- WidthMeters
+- SurfaceType (Asphalt/Concrete/Mixed)
+- ElevationChange
+- NumberOfCorners
+- IsAvailable
+- Description
+- ImageUrl
+- CreatedAt
+- UpdatedAt
+
+**RESERVATIONS**
+- Id (PK)
+- UserId (FK)
+- CarId (FK)
+- CircuitId (FK)
+- StartDate
+- EndDate
+- PickupTime
+- ReturnTime
+- TotalPrice
+- Status (Pending/Confirmed/Cancelled/Completed)
+- CreatedAt
+- UpdatedAt
+
+**CONVERSATIONS**
+- Id (PK)
+- UserId (FK)
+- AdminId (FK, nullable)
+- Subject
+- Status (Open/InProgress/Resolved/Closed)
+- CreatedAt
+- UpdatedAt
+
+**MESSAGES**
+- Id (PK)
+- ConversationId (FK)
+- SenderId (FK)
+- Content
+- SentAt
+- IsRead
+- AttachmentUrl
+
+### Relaciones
+
+- Users 1:N Reservations
+- Users 1:N Conversations
+- Users 1:N Messages
+- Cars 1:N Reservations
+- Circuits 1:N Reservations
+- Conversations 1:N Messages
+
+---
+
+## FUNCIONALIDADES PRINCIPALES
+
+### Área Pública
+
+- Registro e inicio de sesión
+- Catálogo de coches con filtros
+- Catálogo de circuitos con filtros
+- Sistema de reservas paso a paso
+- Cambio de idioma (ES/EN)
+
+### Área de Usuario
+
+- Dashboard personal
+- Historial de reservas
+- Chat con administradores
+- Gestión de perfil
+
+### Área de Administración
+
+- Gestión de usuarios (crear, editar, bloquear, cambiar rol)
+- Gestión de coches (CRUD completo)
+- Gestión de circuitos (CRUD completo)
+- Gestión de reservas (aprobar, cancelar, completar)
+- Gestión de conversaciones del chat
+- Estadísticas del sistema
+
+---
+
+## JUSTIFICACIÓN DE TECNOLOGÍAS
+
+### Backend: C# / .NET
+
+Se ha elegido C# con ASP.NET Core por las siguientes razones:
+
+- Rendimiento superior y tipado fuerte
+- Entity Framework Core facilita el trabajo con bases de datos
+- SignalR integrado para WebSockets
+- Experiencia previa en el entorno de desarrollo
+- Ecosistema robusto y bien documentado
+
+### Frontend: Next.js
+
+- Framework moderno de React con renderizado del lado del servidor
+- Excelente rendimiento y SEO
+- Enrutamiento integrado
+- TypeScript para mayor seguridad en el desarrollo
+- Tailwind CSS permite desarrollo rápido con diseño personalizado
+
+---
+
+## PLANIFICACIÓN Y BITÁCORA
+
+### Fases del Proyecto
+
+1. **Análisis y Diseño** (Semanas 1-2)
+   - Diseño de base de datos
+   - Diseño de interfaces en Figma
+   - Definición de API REST
+
+2. **Desarrollo Backend** (Semanas 3-5)
+   - Configuración de proyecto .NET
+   - Implementación de modelos y migraciones
+   - Desarrollo de controladores y servicios
+   - Sistema de autenticación JWT
+   - Chat con SignalR
+
+3. **Desarrollo Frontend** (Semanas 6-8)
+   - Configuración de Next.js
+   - Implementación de páginas y componentes
+   - Integración con API
+   - Internacionalización
+   - Sistema de routing y protección de rutas
+
+4. **Integración y Pruebas** (Semana 9)
+   - Pruebas end-to-end
+   - Corrección de errores
+   - Optimización de rendimiento
+
+5. **Despliegue** (Semana 10)
+   - Configuración de AWS
+   - Despliegue de backend
+   - Despliegue de frontend
+   - Configuración de dominio y HTTPS
+
+### Bitácora de Tareas
+
+| Fecha | Tarea | Estado |
+|-------|-------|--------|
+| 15/11/2024 | Creación de repositorio y estructura inicial | Completado |
+| 18/11/2024 | Diseño de base de datos | Completado |
+| 20/11/2024 | Configuración proyecto backend | Completado |
+| 22/11/2024 | Implementación modelos y migraciones | Completado |
+| 25/11/2024 | Sistema de autenticación | Completado |
+| 27/11/2024 | Controllers CRUD básicos | Completado |
+| 29/11/2024 | Configuración proyecto frontend | Completado |
+| 01/12/2024 | Implementación de páginas principales | En progreso |
+| 03/12/2024 | Sistema de chat con SignalR | Pendiente |
+
+---
+
+## BIBLIOGRAFÍA Y RECURSOS
+
+- [Documentación oficial de .NET](https://docs.microsoft.com/dotnet/)
+- [Documentación de Next.js](https://nextjs.org/docs)
+- [Documentación de Tailwind CSS](https://tailwindcss.com/docs)
+- [SignalR Documentation](https://docs.microsoft.com/aspnet/core/signalr)
+- [Entity Framework Core](https://docs.microsoft.com/ef/core/)
+- [JWT Authentication](https://jwt.io/introduction)
+- [MDN Web Docs](https://developer.mozilla.org/)
+- Stack Overflow para resolución de problemas específicos
+
 <td>N:1 con Conversations, Users</td>
 </tr>
 </table>

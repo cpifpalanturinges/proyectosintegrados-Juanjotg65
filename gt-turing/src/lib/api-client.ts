@@ -15,7 +15,7 @@ import type {
   CreateMessageRequest,
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5021';
 
 class ApiClient {
   private baseUrl: string;
@@ -52,17 +52,97 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        ...options,
+        headers,
+      });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'An error occurred' }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      // Handle different HTTP status codes
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          message: 'An error occurred',
+          details: `HTTP ${response.status}: ${response.statusText}`
+        }));
+
+        // Create a more detailed error message
+        const errorMessage = errorData.message || errorData.title || 'An error occurred';
+        const errorDetails = errorData.details || errorData.errors || '';
+        
+        const fullError = errorDetails ? `${errorMessage}: ${JSON.stringify(errorDetails)}` : errorMessage;
+
+        // Handle specific error codes
+        switch (response.status) {
+          case 401:
+            // Unauthorized - throw error but don't automatically redirect
+            // Let the AuthContext handle the redirect
+            throw new Error('401_UNAUTHORIZED');
+          
+          case 403:
+            throw new Error('No tienes permisos para realizar esta acción.');
+          
+          case 404:
+            throw new Error('Recurso no encontrado.');
+          
+          case 409:
+            throw new Error(fullError || 'Conflicto con los datos existentes.');
+          
+          case 422:
+            throw new Error(fullError || 'Datos de validación incorrectos.');
+          
+          case 500:
+            throw new Error('Error del servidor. Por favor, intenta más tarde.');
+          
+          default:
+            throw new Error(fullError || `HTTP error! status: ${response.status}`);
+        }
+      }
+
+      // Try to parse JSON response
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json();
+      }
+
+      // For non-JSON responses (like 204 No Content)
+      return {} as T;
+      
+    } catch (error) {
+      // Handle network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Error de conexión. Verifica tu conexión a internet.');
+      }
+      
+      // Re-throw other errors
+      throw error;
     }
+  }
 
-    return response.json();
+  // Generic HTTP methods
+  async get<T = any>(endpoint: string): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, { method: 'GET' });
+    return { data };
+  }
+
+  async post<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  }
+
+  async put<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  }
+
+  async delete<T = any>(endpoint: string): Promise<{ data: T }> {
+    const data = await this.request<T>(endpoint, { method: 'DELETE' });
+    return { data };
   }
 
   // Auth endpoints
@@ -249,6 +329,10 @@ class ApiClient {
     return this.request<User[]>(`/users?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   }
 
+  async getConnectedUsers(): Promise<string[]> {
+    return this.request<string[]>('/users/connected');
+  }
+
   async getUser(id: string): Promise<User> {
     return this.request<User>(`/users/${id}`);
   }
@@ -260,8 +344,62 @@ class ApiClient {
     });
   }
 
+  async updateUserRole(id: string, role: string): Promise<User> {
+    return this.request<User>(`/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
+  }
+
+  async toggleBlockUser(id: string, isBlocked: boolean): Promise<User> {
+    return this.request<User>(`/users/${id}/block`, {
+      method: 'PUT',
+      body: JSON.stringify({ isBlocked }),
+    });
+  }
+
   async deleteUser(id: string): Promise<void> {
     return this.request<void>(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Upload endpoints
+  async uploadImage(file: File, fileName?: string): Promise<{ imageUrl: string; fileName: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (fileName) {
+      formData.append('fileName', fileName);
+    }
+
+    const headers: Record<string, string> = {};
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/upload/image`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          message: 'Error uploading image',
+        }));
+        throw new Error(errorData.message || 'Error uploading image');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  }
+
+  async deleteImage(imageUrl: string): Promise<void> {
+    return this.request<void>(`/upload/image?imageUrl=${encodeURIComponent(imageUrl)}`, {
       method: 'DELETE',
     });
   }

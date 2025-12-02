@@ -26,11 +26,12 @@ namespace gt_turing_backend.DTO
     /// </summary>
     public class CreateConversationDto
     {
-        [Required]
-        [MaxLength(200)]
+        [Required(ErrorMessage = "El asunto es obligatorio")]
+        [StringLength(200, MinimumLength = 3, ErrorMessage = "El asunto debe tener entre 3 y 200 caracteres")]
         public string Subject { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "El mensaje inicial es obligatorio")]
+        [StringLength(5000, MinimumLength = 1, ErrorMessage = "El mensaje debe tener entre 1 y 5000 caracteres")]
         public string InitialMessage { get; set; } = string.Empty;
     }
 
@@ -55,13 +56,15 @@ namespace gt_turing_backend.DTO
     /// </summary>
     public class CreateMessageDto
     {
-        [Required]
+        [Required(ErrorMessage = "El ID de conversación es obligatorio")]
         public Guid ConversationId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "El contenido del mensaje es obligatorio")]
+        [StringLength(5000, MinimumLength = 1, ErrorMessage = "El mensaje debe tener entre 1 y 5000 caracteres")]
         public string Content { get; set; } = string.Empty;
 
-        [MaxLength(500)]
+        [MaxLength(500, ErrorMessage = "La URL del adjunto no puede exceder 500 caracteres")]
+        [Url(ErrorMessage = "La URL del adjunto no es válida")]
         public string? AttachmentUrl { get; set; }
     }
 
@@ -70,7 +73,9 @@ namespace gt_turing_backend.DTO
     /// </summary>
     public class UpdateConversationStatusDto
     {
-        [Required]
+        [Required(ErrorMessage = "El estado es obligatorio")]
+        [RegularExpression("^(Open|InProgress|Closed)$", 
+            ErrorMessage = "Estado inválido. Valores permitidos: Open, InProgress, Closed")]
         public string Status { get; set; } = string.Empty;
 
         public Guid? AdminId { get; set; }

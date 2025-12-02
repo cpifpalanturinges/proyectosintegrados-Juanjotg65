@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/components/Toast';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { showToast, ToastContainer } = useToast();
   
   const [formData, setFormData] = useState({
     firstName: '',
@@ -26,12 +28,16 @@ export default function RegisterPage() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t('register.passwordMismatch'));
+      const errorMsg = t('register.passwordMismatch');
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError(t('register.passwordLength'));
+      const errorMsg = t('register.passwordLength');
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
       return;
     }
 
@@ -46,9 +52,12 @@ export default function RegisterPage() {
         phone: formData.phone || undefined
       });
       
-      router.push('/login?registered=true');
+      showToast('¡Registro exitoso! Redirigiendo al inicio de sesión...', 'success');
+      setTimeout(() => router.push('/login?registered=true'), 1000);
     } catch (err: any) {
-      setError(err.message || t('register.error'));
+      const errorMsg = err.message || t('register.error');
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -63,6 +72,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 relative overflow-hidden">
+      <ToastContainer />
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ top: '5%', left: '5%' }}></div>
@@ -97,7 +107,7 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-semibold text-gray-900 mb-2">
                   {t('register.firstName')}
@@ -253,7 +263,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 group"

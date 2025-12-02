@@ -85,19 +85,12 @@ namespace gt_turing_backend.Controllers
                     query = query.Where(r => r.EndDate <= filter.EndDate.Value);
                 }
 
-                // Pagination
-                var totalCount = await query.CountAsync();
+                // No server-side pagination: return the filtered list and let the frontend paginate client-side.
                 var reservations = await query
                     .OrderByDescending(r => r.CreatedAt)
-                    .Skip((filter.PageNumber - 1) * filter.PageSize)
-                    .Take(filter.PageSize)
                     .ToListAsync();
 
                 var reservationDtos = reservations.Select(MapToDto).ToList();
-
-                Response.Headers.Append("X-Total-Count", totalCount.ToString());
-                Response.Headers.Append("X-Page-Number", filter.PageNumber.ToString());
-                Response.Headers.Append("X-Page-Size", filter.PageSize.ToString());
 
                 return Ok(reservationDtos);
             }
@@ -125,7 +118,7 @@ namespace gt_turing_backend.Controllers
 
                 if (reservation == null)
                 {
-                    return NotFound(new { message = "Reservation not found" });
+                    return NotFound(new { message = "Reserva no encontrada" });
                 }
 
                 // Check authorization
@@ -173,36 +166,42 @@ namespace gt_turing_backend.Controllers
                 // Validate dates
                 if (reservationDto.StartDate >= reservationDto.EndDate)
                 {
-                    return BadRequest(new { message = "End date must be after start date" });
+                    return BadRequest(new { message = "La fecha de fin debe ser posterior a la fecha de inicio" });
                 }
 
                 if (reservationDto.StartDate < DateTime.UtcNow.Date)
                 {
-                    return BadRequest(new { message = "Start date cannot be in the past" });
+                    return BadRequest(new { message = "La fecha de inicio no puede estar en el pasado" });
                 }
 
                 // Check if car exists and is available
                 var car = await _context.Cars.FindAsync(reservationDto.CarId);
                 if (car == null)
                 {
-                    return NotFound(new { message = "Car not found" });
+                    return NotFound(new { message = "Coche no encontrado" });
                 }
 
                 if (car.Status != CarStatus.Available)
                 {
-                    return Conflict(new { message = "Car is not available" });
+                    return Conflict(new { message = "El coche no está disponible" });
                 }
 
                 // Check if circuit exists and is available
                 var circuit = await _context.Circuits.FindAsync(reservationDto.CircuitId);
                 if (circuit == null)
                 {
-                    return NotFound(new { message = "Circuit not found" });
+                    return NotFound(new { message = "Circuito no encontrado" });
                 }
 
                 if (!circuit.IsAvailable)
                 {
-                    return Conflict(new { message = "Circuit is not available" });
+                    return Conflict(new { message = "El circuito no está disponible" });
+                }
+
+                // Business rule: Racing cars cannot be assigned to Concrete circuits
+                if (car.Type == CarType.Racing && circuit.SurfaceType == SurfaceType.Concrete)
+                {
+                    return BadRequest(new { message = "Los coches de competición no pueden asignarse a circuitos de hormigón" });
                 }
 
                 // Check for overlapping reservations
@@ -217,7 +216,7 @@ namespace gt_turing_backend.Controllers
 
                 if (hasOverlap)
                 {
-                    return Conflict(new { message = "Car is already reserved for these dates" });
+                    return Conflict(new { message = "El coche ya está reservado para las fechas seleccionadas" });
                 }
 
                 // Calculate total price
@@ -280,7 +279,7 @@ namespace gt_turing_backend.Controllers
 
                 if (reservation == null)
                 {
-                    return NotFound(new { message = "Reservation not found" });
+                    return NotFound(new { message = "Reserva no encontrada" });
                 }
 
                 // Check authorization
@@ -361,7 +360,7 @@ namespace gt_turing_backend.Controllers
 
                 if (reservation == null)
                 {
-                    return NotFound(new { message = "Reservation not found" });
+                    return NotFound(new { message = "Reserva no encontrada" });
                 }
 
                 // Check authorization
@@ -388,7 +387,41 @@ namespace gt_turing_backend.Controllers
             }
         }
 
-        private ReservationDto MapToDto(Reservation reservation)
+        /// <summary>
+        /// Get occupied dates for a specific car / Obtener fechas ocupadas de un coche específico
+        /// </summary>
+        [HttpGet("car/{carId}/occupied-dates")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<OccupiedDateDto>), 200)]
+        public async Task<IActionResult> GetOccupiedDates(Guid carId)
+        {
+            try
+            {
+                var today = DateTime.UtcNow.Date;
+                var futureLimit = today.AddMonths(6); // Solo próximos 6 meses
+
+                var occupiedReservations = await _context.Reservations
+                    .Where(r => r.CarId == carId 
+                        && r.Status == ReservationStatus.Confirmed 
+                        && r.EndDate >= today
+                        && r.StartDate <= futureLimit)
+                    .Select(r => new OccupiedDateDto
+                    {
+                        StartDate = r.StartDate,
+                        EndDate = r.EndDate,
+                        ReservationId = r.Id
+                    })
+                    .ToListAsync();
+
+                return Ok(occupiedReservations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+            }
+        }
+
+        private static ReservationDto MapToDto(Reservation reservation)
         {
             return new ReservationDto
             {

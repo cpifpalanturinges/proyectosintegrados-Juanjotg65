@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useToast } from '@/components/Toast';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { t } = useLanguage();
+  const { showToast, ToastContainer } = useToast();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,9 +25,12 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-      router.push('/dashboard');
+      showToast('Inicio de sesión exitoso', 'success');
+      setTimeout(() => router.push('/dashboard'), 500);
     } catch (err: any) {
-      setError(err.message || t('login.error'));
+      const errorMsg = err.message || t('login.error');
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setLoading(false);
     }
@@ -33,6 +38,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <ToastContainer />
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style={{ top: '10%', left: '10%' }}></div>
@@ -145,7 +151,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 type="button"
                 className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-300 group"

@@ -138,8 +138,8 @@ export default function Home() {
                 <div className={`relative inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-xl text-white mb-6 transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300`}>
                   {feature.icon}
                 </div>
-                <h3 className="relative text-2xl font-bold mb-4 text-gray-900">{feature.title}</h3>
-                <p className="relative text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="relative text-2xl font-bold mb-4 text-gray-900">{t(`home.features.feature${index + 1}Title`)}</h3>
+                <p className="relative text-gray-600 leading-relaxed">{t(`home.features.feature${index + 1}Desc`)}</p>
               </div>
             ))}
           </div>
@@ -151,19 +151,19 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Cómo Funciona
+              {t('home.howItWorks.title')}
             </h2>
             <p className="text-xl text-gray-600">
-              Tu experiencia en 4 simples pasos
+              {t('home.howItWorks.subtitle')}
             </p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { step: '1', title: 'Elige tu Coche', icon: '🏎️', description: 'Selecciona de nuestra flota premium' },
-              { step: '2', title: 'Selecciona Circuito', icon: '🏁', description: 'Elige el circuito perfecto' },
-              { step: '3', title: 'Reserva Online', icon: '📱', description: 'Pago seguro y confirmación instantánea' },
-              { step: '4', title: '¡A Conducir!', icon: '🎉', description: 'Vive la adrenalina pura' },
+              { step: '1', icon: '🏎️' },
+              { step: '2', icon: '🏁' },
+              { step: '3', icon: '📱' },
+              { step: '4', icon: '🎉' },
             ].map((step, index) => (
               <div key={index} className="relative">
                 <div className="bg-white rounded-2xl p-8 text-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
@@ -171,8 +171,8 @@ export default function Home() {
                     {step.step}
                   </div>
                   <div className="text-5xl mb-4 mt-4">{step.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">{step.title}</h3>
-                  <p className="text-gray-600 text-sm">{step.description}</p>
+                  <h3 className="text-xl font-bold mb-2 text-gray-900">{t(`home.howItWorks.step${index + 1}Title`)}</h3>
+                  <p className="text-gray-600 text-sm">{t(`home.howItWorks.step${index + 1}Desc`)}</p>
                 </div>
                 {index < 3 && (
                   <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 text-blue-300">
@@ -195,10 +195,10 @@ export default function Home() {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
-            ¿Listo para la Experiencia de tu Vida?
+            {t('home.cta.title')}
           </h2>
           <p className="text-xl text-blue-100 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Únete a cientos de conductores que ya han vivido la emoción
+            {t('home.cta.subtitle')}
           </p>
           {!isAuthenticated && (
             <Link 
@@ -206,7 +206,7 @@ export default function Home() {
               className="inline-flex items-center px-10 py-4 text-lg font-bold text-blue-600 bg-white rounded-xl hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-2xl animate-fade-in-up"
               style={{ animationDelay: '0.4s' }}
             >
-              Crear Cuenta Gratis
+              {t('home.cta.button')}
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

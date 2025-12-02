@@ -1,23 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
 
 interface CalendarProps {
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
-  unavailableDates?: Date[];
+  carId?: string; // ID del coche para obtener fechas ocupadas
   minDate?: Date;
   maxDate?: Date;
+}
+
+interface OccupiedDate {
+  reservationId: string;
+  startDate: string;
+  endDate: string;
 }
 
 export default function Calendar({
   selectedDate,
   onDateSelect,
-  unavailableDates = [],
+  carId,
   minDate,
   maxDate
 }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
+  const [occupiedDates, setOccupiedDates] = useState<Date[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Cargar fechas ocupadas cuando cambie el coche
+  useEffect(() => {
+    const fetchOccupiedDates = async () => {
+      if (!carId) {
+        setOccupiedDates([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await apiClient.get<OccupiedDate[]>(
+          `/reservations/car/${carId}/occupied-dates`
+        );
+        
+        // Convertir las fechas ocupadas a un array de fechas
+        const dates: Date[] = [];
+        response.data.forEach((occupation: OccupiedDate) => {
+          // Normalizar las fechas a medianoche en hora local
+          const start = new Date(occupation.startDate);
+          start.setHours(0, 0, 0, 0);
+          
+          const end = new Date(occupation.endDate);
+          end.setHours(0, 0, 0, 0);
+          
+          // Agregar todas las fechas entre start y end (inclusive)
+          const currentDate = new Date(start);
+          while (currentDate <= end) {
+            dates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+        });
+        
+        console.log(`Loaded ${dates.length} occupied dates for car ${carId}:`, dates);
+        setOccupiedDates(dates);
+      } catch (error) {
+        console.error('Error fetching occupied dates:', error);
+        setOccupiedDates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOccupiedDates();
+  }, [carId]);
+
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
@@ -47,12 +102,16 @@ export default function Calendar({
   };
 
   const isDateUnavailable = (date: Date) => {
-    return unavailableDates.some(
-      unavailable =>
-        unavailable.getDate() === date.getDate() &&
-        unavailable.getMonth() === date.getMonth() &&
-        unavailable.getFullYear() === date.getFullYear()
-    );
+    // Normalizar la fecha de entrada a medianoche para comparación
+    const normalizedDate = new Date(date);
+    normalizedDate.setHours(0, 0, 0, 0);
+    
+    return occupiedDates.some((unavailable: Date) => {
+      const normalizedUnavailable = new Date(unavailable);
+      normalizedUnavailable.setHours(0, 0, 0, 0);
+      
+      return normalizedUnavailable.getTime() === normalizedDate.getTime();
+    });
   };
 
   const isDateDisabled = (date: Date) => {

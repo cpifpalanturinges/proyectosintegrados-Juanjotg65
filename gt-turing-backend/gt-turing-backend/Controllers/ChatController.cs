@@ -6,6 +6,7 @@ using gt_turing_backend.DTO;
 using gt_turing_backend.Models;
 using Microsoft.AspNetCore.SignalR;
 using gt_turing_backend.Hubs;
+using gt_turing_backend.Middleware;
 
 namespace gt_turing_backend.Controllers
 {
@@ -174,8 +175,14 @@ namespace gt_turing_backend.Controllers
                 await _context.Entry(conversation).Reference(c => c.User).LoadAsync();
                 await _context.Entry(conversation).Collection(c => c.Messages).LoadAsync();
 
-                // Notify admins via SignalR
-                await _hubContext.Clients.Group("Admins").SendAsync("NewConversation", MapToConversationDto(conversation, userId));
+                // Notify all users via WebSocket (admins will see it)
+                await WebSocketChatMiddleware.BroadcastMessage(conversation.Id.ToString(), new
+                {
+                    type = "ConversationCreated",
+                    conversationId = conversation.Id.ToString(),
+                    userId = userId.ToString(),
+                    subject = conversation.Subject
+                });
 
                 return CreatedAtAction(nameof(GetConversation), new { id = conversation.Id }, MapToConversationDto(conversation, userId));
             }
@@ -355,8 +362,18 @@ namespace gt_turing_backend.Controllers
 
                 var messageDto2 = MapToMessageDto(message);
 
-                // Notify via SignalR
-                await _hubContext.Clients.Group($"Conversation_{conversation.Id}").SendAsync("NewMessage", messageDto2);
+                // Notify via WebSocket
+                await WebSocketChatMiddleware.BroadcastMessage(conversation.Id.ToString(), new
+                {
+                    type = "ReceiveMessage",
+                    id = message.Id.ToString(),
+                    conversationId = conversation.Id.ToString(),
+                    senderId = message.SenderId.ToString(),
+                    senderName = message.Sender?.FirstName + " " + message.Sender?.LastName,
+                    content = message.Content,
+                    sentAt = message.SentAt,
+                    isRead = message.IsRead
+                });
 
                 return CreatedAtAction(nameof(GetMessages), new { conversationId = messageDto.ConversationId }, messageDto2);
             }

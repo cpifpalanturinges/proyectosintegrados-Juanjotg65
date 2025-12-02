@@ -13,18 +13,21 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isAdmin } = useAuth();
+  const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const { t } = useLanguage();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking
+    if (authLoading) return;
+    
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
     loadReservations();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
 
   const loadReservations = async () => {
     try {
@@ -37,7 +40,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -62,9 +65,9 @@ export default function DashboardPage() {
                 <span className="text-3xl">👋</span>
               </div>
               <div>
-                <h1 className="text-5xl font-bold">¡Bienvenido, {user?.firstName}!</h1>
+                <h1 className="text-5xl font-bold">{t('dashboard.welcome')} {user?.firstName}!</h1>
                 <p className="text-xl text-blue-100 mt-2">
-                  {isAdmin ? '👑 Panel de Administración' : '🏎️ Tu panel de control personalizado'}
+                  {isAdmin ? `👑 ${t('dashboard.adminSubtitle')}` : `🏎️ ${t('dashboard.subtitle')}`}
                 </p>
               </div>
             </div>
@@ -74,10 +77,10 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Quick Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transform hover:scale-105 transition-all duration-300 animate-fade-in group">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-semibold text-gray-600">Reservas Activas</div>
+              <div className="text-sm font-semibold text-gray-600">{t('dashboard.stats.active')}</div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -87,12 +90,12 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
               {activeReservations.length}
             </div>
-            <div className="text-xs text-gray-500 mt-2">En curso o pendientes</div>
+            <div className="text-xs text-gray-500 mt-2">{t('dashboard.stats.activeDesc')}</div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transform hover:scale-105 transition-all duration-300 animate-fade-in group" style={{ animationDelay: '0.1s' }}>
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-semibold text-gray-600">Completadas</div>
+              <div className="text-sm font-semibold text-gray-600">{t('dashboard.stats.completed')}</div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -102,12 +105,12 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
               {completedReservations.length}
             </div>
-            <div className="text-xs text-gray-500 mt-2">Experiencias realizadas</div>
+            <div className="text-xs text-gray-500 mt-2">{t('dashboard.stats.completedDesc')}</div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transform hover:scale-105 transition-all duration-300 animate-fade-in group" style={{ animationDelay: '0.2s' }}>
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-semibold text-gray-600">Total Reservas</div>
+              <div className="text-sm font-semibold text-gray-600">{t('dashboard.stats.total')}</div>
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
@@ -117,12 +120,12 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
               {reservations.length}
             </div>
-            <div className="text-xs text-gray-500 mt-2">Historial completo</div>
+            <div className="text-xs text-gray-500 mt-2">{t('dashboard.stats.totalDesc')}</div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transform hover:scale-105 transition-all duration-300 animate-fade-in group" style={{ animationDelay: '0.3s' }}>
             <div className="flex items-center justify-between mb-3">
-              <div className="text-sm font-semibold text-gray-600">Total Gastado</div>
+              <div className="text-sm font-semibold text-gray-600">{t('dashboard.stats.spent')}</div>
               <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -132,7 +135,7 @@ export default function DashboardPage() {
             <div className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
               {totalSpent}€
             </div>
-            <div className="text-xs text-gray-500 mt-2">En experiencias</div>
+            <div className="text-xs text-gray-500 mt-2">{t('dashboard.stats.spentDesc')}</div>
           </div>
         </div>
 
@@ -143,12 +146,12 @@ export default function DashboardPage() {
             className="group bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 animate-fade-in"
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-2xl font-bold">Coches</div>
+              <div className="text-2xl font-bold">{t('dashboard.actions.cars')}</div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </div>
-            <div className="text-blue-100 text-sm">Explora nuestra flota</div>
+            <div className="text-blue-100 text-sm">{t('dashboard.actions.carsSub')}</div>
           </Link>
 
           <Link
@@ -157,26 +160,26 @@ export default function DashboardPage() {
             style={{ animationDelay: '0.1s' }}
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-2xl font-bold">Circuitos</div>
+              <div className="text-2xl font-bold">{t('dashboard.actions.circuits')}</div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </div>
-            <div className="text-purple-100 text-sm">Descubre las pistas</div>
+            <div className="text-purple-100 text-sm">{t('dashboard.actions.circuitsSub')}</div>
           </Link>
 
           <Link
-            href="/reservations/new"
+            href="/reservations"
             className="group bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 animate-fade-in"
             style={{ animationDelay: '0.2s' }}
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-2xl font-bold">Reservar</div>
+              <div className="text-2xl font-bold">{t('dashboard.actions.reserve')}</div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <div className="text-green-100 text-sm">Nueva experiencia</div>
+            <div className="text-green-100 text-sm">{t('dashboard.actions.reserveSub')}</div>
           </Link>
 
           <Link
@@ -185,12 +188,12 @@ export default function DashboardPage() {
             style={{ animationDelay: '0.3s' }}
           >
             <div className="flex items-center justify-between mb-2">
-              <div className="text-2xl font-bold">Chat</div>
+              <div className="text-2xl font-bold">{t('dashboard.actions.chat')}</div>
               <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <div className="text-orange-100 text-sm">Soporte en línea</div>
+            <div className="text-orange-100 text-sm">{t('dashboard.actions.chatSub')}</div>
           </Link>
         </div>
 
@@ -205,12 +208,12 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Mis Reservas
+                  {t('dashboard.reservations.title')}
                 </h2>
               </div>
               {reservations.length > 0 && (
                 <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                  {reservations.length} {reservations.length === 1 ? 'reserva' : 'reservas'}
+                  {reservations.length} {t('dashboard.reservations.viewAll')}
                 </span>
               )}
             </div>
@@ -220,13 +223,13 @@ export default function DashboardPage() {
             {reservations.length === 0 ? (
               <div className="text-center py-16 animate-fade-in">
                 <div className="text-8xl mb-4 animate-bounce-slow">🏎️</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Comienza Tu Aventura!</h3>
-                <p className="text-gray-600 mb-6 text-lg">Aún no tienes reservas. Es momento de vivir la experiencia.</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('dashboard.reservations.empty')}</h3>
+                <p className="text-gray-600 mb-6 text-lg">{t('dashboard.reservations.noReservations')}</p>
                 <Link
                   href="/cars"
                   className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                  <span>Explorar Coches</span>
+                  <span>{t('dashboard.reservations.explore')}</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -269,9 +272,9 @@ export default function DashboardPage() {
                             : 'bg-gray-100 text-gray-700 border-2 border-gray-300'
                         }`}
                       >
-                        {reservation.status === 'Confirmed' ? '✅ Confirmada' : 
-                         reservation.status === 'Pending' ? '⏳ Pendiente' :
-                         reservation.status === 'Cancelled' ? '❌ Cancelada' : '✔️ Completada'}
+                        {reservation.status === 'Confirmed' ? t('dashboard.reservations.confirmed') : 
+                         reservation.status === 'Pending' ? t('dashboard.reservations.pending') :
+                         reservation.status === 'Cancelled' ? t('dashboard.reservations.cancelled') : t('dashboard.reservations.completed')}
                       </span>
                     </div>
 
@@ -281,10 +284,14 @@ export default function DashboardPage() {
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span>INICIO</span>
+                          <span>{t('dashboard.reservations.start')}</span>
                         </div>
                         <div className="font-bold text-gray-900">
-                          {new Date(reservation.startDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                          {new Date(reservation.startDate).toLocaleDateString('es-ES', { 
+                            day: '2-digit', 
+                            month: 'short',
+                            year: 'numeric'
+                          })}
                         </div>
                       </div>
 
@@ -293,10 +300,14 @@ export default function DashboardPage() {
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                          <span>FIN</span>
+                          <span>{t('dashboard.reservations.end')}</span>
                         </div>
                         <div className="font-bold text-gray-900">
-                          {new Date(reservation.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                          {new Date(reservation.endDate).toLocaleDateString('es-ES', { 
+                            day: '2-digit', 
+                            month: 'short',
+                            year: 'numeric'
+                          })}
                         </div>
                       </div>
 
@@ -305,7 +316,7 @@ export default function DashboardPage() {
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>RECOGIDA</span>
+                          <span>{t('dashboard.reservations.pickup')}</span>
                         </div>
                         <div className="font-bold text-gray-900">{reservation.pickupTime}</div>
                       </div>
@@ -315,7 +326,7 @@ export default function DashboardPage() {
                           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span>TOTAL</span>
+                          <span>{t('dashboard.reservations.total')}</span>
                         </div>
                         <div className="font-bold text-2xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                           {reservation.totalPrice}€

@@ -78,11 +78,33 @@ namespace gt_turing_backend.Controllers
         }
 
         /// <summary>
+        /// Get connected users / Obtener usuarios conectados
+        /// </summary>
+        [HttpGet("connected")]
+        [ProducesResponseType(typeof(List<string>), 200)]
+        public IActionResult GetConnectedUsers()
+        {
+            try
+            {
+                var connectedUserIds = gt_turing_backend.Middleware.WebSocketChatMiddleware.GetConnectedUserIds();
+                return Ok(connectedUserIds);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Update user / Actualizar usuario
+        /// Users can update their own profile, admins can update any profile
         /// </summary>
         [HttpPut("{id}")]
+        [AllowAnonymous] // Override the controller-level policy
+        [Authorize] // But still require authentication
         [ProducesResponseType(typeof(UserDto), 200)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto userDto)
         {
@@ -93,6 +115,22 @@ namespace gt_turing_backend.Controllers
 
             try
             {
+                var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                
+                if (currentUserIdClaim == null)
+                {
+                    return Unauthorized();
+                }
+
+                var currentUserId = Guid.Parse(currentUserIdClaim.Value);
+                
+                // Users can only update their own profile, admins can update any profile
+                if (currentUserId != id && currentUserRole != "Admin")
+                {
+                    return Forbid();
+                }
+
                 var user = await _context.Users.FindAsync(id);
 
                 if (user == null)
@@ -102,12 +140,79 @@ namespace gt_turing_backend.Controllers
 
                 user.FirstName = userDto.FirstName;
                 user.LastName = userDto.LastName;
+                user.Email = userDto.Email;
                 user.Phone = userDto.Phone;
                 user.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
                 return Ok(MapToDto(user));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Change user password / Cambiar contraseña de usuario
+        /// Users can change their own password, admins can change any password
+        /// </summary>
+        [HttpPut("{id}/password")]
+        [AllowAnonymous] // Override the controller-level policy
+        [Authorize] // But still require authentication
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> ChangePassword(Guid id, [FromBody] ChangePasswordDto passwordDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+                var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                
+                if (currentUserIdClaim == null)
+                {
+                    return Unauthorized();
+                }
+
+                var currentUserId = Guid.Parse(currentUserIdClaim.Value);
+                
+                // Users can only change their own password, admins can change any password
+                if (currentUserId != id && currentUserRole != "Admin")
+                {
+                    return Forbid();
+                }
+
+                var user = await _context.Users.FindAsync(id);
+
+                if (user == null)
+                {
+                    return NotFound(new { message = "User not found" });
+                }
+
+                // Verify current password (only if user is changing their own password)
+                if (currentUserId == id)
+                {
+                    if (!BCrypt.Net.BCrypt.Verify(passwordDto.CurrentPassword, user.PasswordHash))
+                    {
+                        return BadRequest(new { message = "Current password is incorrect" });
+                    }
+                }
+
+                // Hash and update new password
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(passwordDto.NewPassword);
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Password changed successfully" });
             }
             catch (Exception ex)
             {

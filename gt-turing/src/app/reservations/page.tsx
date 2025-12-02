@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiClient } from '@/lib/api-client';
@@ -9,12 +9,15 @@ import { Car, Circuit } from '@/types';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Calendar from '@/components/Calendar';
+import TimePicker from '@/components/TimePicker';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { useToast } from '@/components/Toast';
 
 export default function NewReservationPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useLanguage();
+  const { showToast, ToastContainer } = useToast();
   
   const [step, setStep] = useState(1);
   const [cars, setCars] = useState<Car[]>([]);
@@ -29,12 +32,31 @@ export default function NewReservationPage() {
   const [returnTime, setReturnTime] = useState('18:00');
 
   useEffect(() => {
+    // Wait for auth to finish loading before checking
+    if (authLoading) return;
+    
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
     loadData();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authLoading]);
+
+  // If query params provide preselected carId / circuitId, apply them after data loads
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (cars.length === 0 || circuits.length === 0) return;
+    const carId = searchParams?.get('carId');
+    const circuitId = searchParams?.get('circuitId');
+    if (carId) {
+      const pre = cars.find(c => c.id === carId);
+      if (pre) setSelectedCar(pre);
+    }
+    if (circuitId) {
+      const preC = circuits.find(c => c.id === circuitId);
+      if (preC) setSelectedCircuit(preC);
+    }
+  }, [cars, circuits, searchParams]);
 
   const loadData = async () => {
     setLoading(true);
@@ -63,52 +85,92 @@ export default function NewReservationPage() {
 
     setLoading(true);
     try {
+      const formatTimeForBackend = (time: string) => {
+        // backend expects TimeSpan -> format as HH:mm:ss
+        if (!time) return '00:00:00';
+        const parts = time.split(':');
+        if (parts.length === 3) return time;
+        if (parts.length === 2) return `${parts[0].padStart(2,'0')}:${parts[1].padStart(2,'0')}:00`;
+        return `${time}:00`;
+      };
+
       await apiClient.createReservation({
         carId: selectedCar.id,
         circuitId: selectedCircuit.id,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        pickupTime,
-        returnTime
+        pickupTime: formatTimeForBackend(pickupTime),
+        returnTime: formatTimeForBackend(returnTime)
       });
-      router.push('/dashboard?reservation=success');
+      showToast('¡Reserva creada exitosamente!', 'success');
+      setTimeout(() => router.push('/dashboard?reservation=success'), 1000);
     } catch (error) {
-      alert('Error al crear la reserva');
-      console.error(error);
+      // Try to extract server message
+      const raw = (error as any)?.message || 'Error al crear la reserva';
+      const translateBackendMessage = (m: string) => {
+        // Map common backend messages to Spanish-friendly messages
+        const map: Record<string, string> = {
+          'Car is not available': 'El coche no está disponible',
+          'Circuit is not available': 'El circuito no está disponible',
+          'End date must be after start date': 'La fecha de fin debe ser posterior a la fecha de inicio',
+          'Start date cannot be in the past': 'La fecha de inicio no puede estar en el pasado',
+          'Car is already reserved for these dates': 'El coche ya está reservado para las fechas seleccionadas',
+          'Racing cars cannot be assigned to Concrete circuits': 'Los coches de competición no pueden asignarse a circuitos de hormigón',
+          'Car not found': 'Coche no encontrado',
+          'Circuit not found': 'Circuito no encontrado',
+        };
+        // Try exact match first
+        if (map[m]) return map[m];
+        // Try to find a substring match
+        for (const key of Object.keys(map)) {
+          if (m.includes(key)) return map[key];
+        }
+        // Fallback: return original message (or a generic Spanish message)
+        return m || 'Error al crear la reserva';
+      };
+
+      const msg = translateBackendMessage(raw);
+      showToast(msg, 'error');
+      console.error('Create reservation error:', raw, error);
     } finally {
       setLoading(false);
     }
   };
 
   const nextStep = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 4) {
+      if (step === 1 && !selectedCar) {
+        showToast('Por favor, selecciona un coche', 'warning');
+        return;
+      }
+      if (step === 2 && !selectedCircuit) {
+        showToast('Por favor, selecciona un circuito', 'warning');
+        return;
+      }
+      if (step === 3 && (!startDate || !endDate)) {
+        showToast('Por favor, selecciona las fechas de tu reserva', 'warning');
+        return;
+      }
+      setStep(step + 1);
+    }
   };
 
   const prevStep = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const getUnavailableDates = () => {
-    // Aquí podrías cargar las fechas no disponibles del servidor
-    // Por ahora retornamos algunas fechas de ejemplo
-    const today = new Date();
-    return [
-      new Date(today.getFullYear(), today.getMonth(), 15),
-      new Date(today.getFullYear(), today.getMonth(), 16),
-      new Date(today.getFullYear(), today.getMonth(), 25),
-    ];
-  };
-
   if (loading && (cars.length === 0 || circuits.length === 0)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <ToastContainer />
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      <ToastContainer />
       <Navbar />
 
       {/* Hero Header */}
@@ -163,7 +225,8 @@ export default function NewReservationPage() {
                 Selecciona tu Coche
               </h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cars.map((car) => (
+                {cars.map((car) => {
+                  return (
                   <div
                     key={car.id}
                     onClick={() => setSelectedCar(car)}
@@ -198,7 +261,8 @@ export default function NewReservationPage() {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -210,15 +274,20 @@ export default function NewReservationPage() {
                 Selecciona el Circuito
               </h2>
               <div className="grid md:grid-cols-2 gap-6">
-                {circuits.map((circuit) => (
+                {circuits.map((circuit) => {
+                  const incompatible = selectedCar?.type === 'Racing' && circuit.surfaceType === 'Concrete';
+                  return (
                   <div
                     key={circuit.id}
-                    onClick={() => setSelectedCircuit(circuit)}
+                    onClick={() => {
+                      if (incompatible) { alert('Este coche de competición no puede correr en circuitos de hormigón'); return; }
+                      setSelectedCircuit(circuit);
+                    }}
                     className={`group cursor-pointer bg-white rounded-xl shadow-lg p-6 border-2 transition-all duration-300 transform hover:-translate-y-2 ${
                       selectedCircuit?.id === circuit.id
                         ? 'border-green-600 shadow-2xl scale-105'
                         : 'border-gray-200 hover:border-green-300'
-                    }`}
+                    } ${incompatible ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <div className="flex items-start space-x-4">
                       <div className="text-5xl">🏁</div>
@@ -229,7 +298,7 @@ export default function NewReservationPage() {
                         <div className="space-y-1 text-sm text-gray-600">
                           <p>📍 {circuit.location}, {circuit.province}</p>
                           <p>📏 {circuit.lengthMeters} metros</p>
-                          <p>🛣️ {circuit.surfaceType}</p>
+                          <p>🛣️ {t(`circuits.surface.${circuit.surfaceType.toLowerCase()}`)}</p>
                         </div>
                         {selectedCircuit?.id === circuit.id && (
                           <div className="mt-3">
@@ -241,7 +310,8 @@ export default function NewReservationPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -258,7 +328,7 @@ export default function NewReservationPage() {
                   <Calendar
                     selectedDate={startDate}
                     onDateSelect={setStartDate}
-                    unavailableDates={getUnavailableDates()}
+                    carId={selectedCar?.id}
                     minDate={new Date()}
                   />
                 </div>
@@ -267,7 +337,7 @@ export default function NewReservationPage() {
                   <Calendar
                     selectedDate={endDate}
                     onDateSelect={setEndDate}
-                    unavailableDates={getUnavailableDates()}
+                    carId={selectedCar?.id}
                     minDate={startDate || new Date()}
                   />
                 </div>
@@ -276,25 +346,17 @@ export default function NewReservationPage() {
               {/* Time Selection */}
               <div className="grid md:grid-cols-2 gap-8 mt-8">
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <label className="block text-sm font-bold text-gray-900 mb-3">
-                    Hora de Recogida
-                  </label>
-                  <input
-                    type="time"
+                  <TimePicker
                     value={pickupTime}
-                    onChange={(e) => setPickupTime(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                    onChange={setPickupTime}
+                    label="Hora de Recogida"
                   />
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                  <label className="block text-sm font-bold text-gray-900 mb-3">
-                    Hora de Devolución
-                  </label>
-                  <input
-                    type="time"
+                  <TimePicker
                     value={returnTime}
-                    onChange={(e) => setReturnTime(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                    onChange={setReturnTime}
+                    label="Hora de Devolución"
                   />
                 </div>
               </div>

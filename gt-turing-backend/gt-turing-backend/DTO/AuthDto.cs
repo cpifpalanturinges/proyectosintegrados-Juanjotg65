@@ -7,12 +7,13 @@ namespace gt_turing_backend.DTO
     /// </summary>
     public class LoginRequestDto
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "El correo electrónico es obligatorio")]
+        [EmailAddress(ErrorMessage = "El correo electrónico no es válido")]
+        [StringLength(255, ErrorMessage = "El correo electrónico no puede exceder 255 caracteres")]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [MinLength(6)]
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
         public string Password { get; set; } = string.Empty;
     }
 
@@ -21,21 +22,27 @@ namespace gt_turing_backend.DTO
     /// </summary>
     public class RegisterRequestDto
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "El correo electrónico es obligatorio")]
+        [EmailAddress(ErrorMessage = "El correo electrónico no es válido")]
+        [StringLength(255, ErrorMessage = "El correo electrónico no puede exceder 255 caracteres")]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [MinLength(6)]
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", 
+            ErrorMessage = "La contraseña debe contener al menos una mayúscula, una minúscula y un número")]
         public string Password { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "El apellido es obligatorio")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "El apellido debe tener entre 2 y 100 caracteres")]
         public string LastName { get; set; } = string.Empty;
 
-        [Phone]
+        [Phone(ErrorMessage = "El número de teléfono no es válido")]
+        [StringLength(20, ErrorMessage = "El teléfono no puede exceder 20 caracteres")]
         public string? Phone { get; set; }
     }
 
@@ -74,6 +81,10 @@ namespace gt_turing_backend.DTO
 
         [Required]
         public string LastName { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Phone]
         public string? Phone { get; set; }
