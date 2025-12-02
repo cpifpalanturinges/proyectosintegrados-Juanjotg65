@@ -374,6 +374,15 @@ export const translations = {
       contactUs: 'Contáctanos',
     },
 
+    // 404 Not Found Page
+    notFound: {
+      title: 'Página no encontrada',
+      description: 'Lo sentimos, la página que buscas no existe o ha sido movida.',
+      goHome: 'Volver al Inicio',
+      viewCars: 'Ver Coches',
+      helpText: '¿Necesitas ayuda? Explora estas secciones:',
+    },
+
     // Contact Page
     contact: {
       title: 'Contacto',
@@ -829,6 +838,15 @@ export const translations = {
       notFound: "Can't find your answer?",
       notFoundSub: 'Our team is ready to help you with any questions',
       contactUs: 'Contact Us',
+    },
+
+    // 404 Not Found Page
+    notFound: {
+      title: 'Page not found',
+      description: "Sorry, the page you're looking for doesn't exist or has been moved.",
+      goHome: 'Go Home',
+      viewCars: 'View Cars',
+      helpText: 'Need help? Explore these sections:',
     },
 
     // Contact Page
