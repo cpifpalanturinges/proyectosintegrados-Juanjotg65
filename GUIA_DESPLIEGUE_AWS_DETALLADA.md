@@ -848,7 +848,21 @@ http://54.83.171.149:3000
 ---
 
 ## 13. CONFIGURAR NGINX
+# Cambiar el .env.production para incluir /api
+echo "NEXT_PUBLIC_API_URL=http://54.83.171.149:5021/api" > /var/www/proyectosintegrados-Juanjotg65/gt-turing/.env.production
 
+# Reconstruir
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing
+rm -rf .next
+npm run build
+sudo systemctl restart gt-turing-frontend# Cambiar el .env.production para incluir /api
+echo "NEXT_PUBLIC_API_URL=http://54.83.171.149:5021/api" > /var/www/proyectosintegrados-Juanjotg65/gt-turing/.env.production
+
+# Reconstruir
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing
+rm -rf .next
+npm run build
+sudo systemctl restart gt-turing-frontend
 ### ¿Por qué Nginx?
 - **Proxy reverso:** Redirige las peticiones a nuestros servicios
 - **HTTPS:** Permite usar certificados SSL
@@ -1353,6 +1367,1113 @@ sudo tail -f /var/log/nginx/error.log
 
 ---
 
+## 17. ACCESO MEDIANTE HTTPS
+
+**En este punto ya tienes HTTPS configurado!** ✅
+
+Si seguiste los pasos 13 y 14, ya creaste:
+- ✅ Certificado SSL autofirmado
+- ✅ Nginx configurado para HTTPS en puerto 443
+- ✅ Redirección automática de HTTP a HTTPS
+
+### Paso 17.1: Verificar que HTTPS funciona
+
+**Desde tu navegador:**
+
+```
+https://54.83.171.149
+```
+
+⚠️ **IMPORTANTE:** Verás una advertencia de seguridad porque es un certificado autofirmado.
+
+**Cómo aceptar el riesgo:**
+
+**En Chrome:**
+1. Verás: "Tu conexión no es privada"
+2. Clic en **"Avanzado"**
+3. Clic en **"Acceder a 54.83.171.149 (no seguro)"**
+
+**En Firefox:**
+1. Verás: "Advertencia: Riesgo potencial de seguridad a continuación"
+2. Clic en **"Avanzado"**
+3. Clic en **"Aceptar el riesgo y continuar"**
+
+**En Edge:**
+1. Verás: "Su conexión no es privada"
+2. Clic en **"Avanzadas"**
+3. Clic en **"Continuar a 54.83.171.149 (no seguro)"**
+
+✅ **Después de aceptar, ya puedes usar HTTPS normalmente**
+
+### Paso 17.2: Probar todas las funcionalidades con HTTPS
+
+1. **Página de inicio:**
+   ```
+   https://54.83.171.149
+   ```
+
+2. **Login:**
+   ```
+   https://54.83.171.149/login
+   ```
+   - Email: `admin@gt-turing.com`
+   - Password: `Admin123!`
+
+3. **Ver coches:**
+   ```
+   https://54.83.171.149/cars
+   ```
+
+4. **Ver circuitos:**
+   ```
+   https://54.83.171.149/circuits
+   ```
+
+5. **Dashboard:**
+   ```
+   https://54.83.171.149/dashboard
+   ```
+
+6. **Swagger API:**
+   ```
+   https://54.83.171.149/swagger
+   ```
+
+### Paso 17.3: ¿Por qué aparece la advertencia de seguridad?
+
+El certificado es **autofirmado**, lo que significa:
+- ✅ **La conexión SÍ está cifrada** (segura)
+- ✅ **Los datos SÍ viajan encriptados**
+- ❌ **No está firmado por una Autoridad Certificadora** reconocida (como Let's Encrypt)
+
+**Solución para eliminar la advertencia:**
+- Necesitas un **dominio** (gratis o de pago)
+- Con dominio, puedes usar **Let's Encrypt** (certificado SSL gratis y válido)
+- Ver sección 18 (opcional) para configurar dominio
+
+### Paso 17.4: Guardar la excepción del certificado en tu navegador
+
+**Para no tener que aceptar el riesgo cada vez:**
+
+1. **Acepta el riesgo** una vez (paso 17.1)
+2. El navegador guardará la excepción
+3. Las próximas veces entrará directamente sin advertencia
+
+---
+
+## 18. CONFIGURAR DOMINIO GRATUITO (OPCIONAL - Para eliminar advertencia SSL)
+
+**⚠️ ESTA SECCIÓN ES COMPLETAMENTE OPCIONAL**
+
+Si quieres eliminar la advertencia de seguridad del navegador, necesitas un dominio. Aquí te explico cómo hacerlo **GRATIS**.
+
+### ¿Qué opciones gratuitas hay?
+
+| Servicio | Tipo | Ejemplo | Validez |
+|----------|------|---------|---------|
+| **DuckDNS** | Subdominio | `gt-turing.duckdns.org` | Gratis siempre |
+| **No-IP** | Subdominio | `gt-turing.hopto.org` | Gratis siempre |
+| **Freenom** | Dominio completo | `gt-turing.tk` | 1 año gratis |
+
+**Recomendación:** Usa **DuckDNS** - es el más sencillo y confiable.
+
+---
+
+### OPCIÓN A: DUCKDNS (Recomendado - 100% Gratis)
+
+### Paso 18.1: Registrarse en DuckDNS
+
+1. **Ir a DuckDNS:**
+   ```
+   https://www.duckdns.org/
+   ```
+
+2. **Iniciar sesión con:**
+   - Google
+   - GitHub
+   - Reddit
+   - Twitter
+   - (Elige el que prefieras)
+
+3. **Ya estás dentro!** 🎉
+
+### Paso 18.2: Crear tu subdominio
+
+1. **En la caja "sub domain", escribe:**
+   ```
+   gt-turing
+   ```
+
+2. **Resultado:** Tu dominio será `gt-turing.duckdns.org`
+
+3. **En "current ip", poner tu IP de AWS:**
+   ```
+   54.83.171.149
+   ```
+
+4. **Clic en "add domain"**
+
+5. ✅ **Subdominio creado!**
+
+### Paso 18.3: Verificar que el dominio funciona
+
+**Desde PowerShell en tu ordenador:**
+
+```powershell
+nslookup gt-turing.duckdns.org
+
+# Debería mostrar:
+# Address: 54.83.171.149
+```
+
+**Desde el navegador:**
+```
+http://gt-turing.duckdns.org:3000
+```
+
+✅ Debería cargar tu aplicación
+
+### Paso 18.4: Actualizar configuración de Nginx
+
+**Conectar al servidor AWS:**
+
+```bash
+ssh -i "$env:USERPROFILE\.ssh\labsuser.pem" ubuntu@54.83.171.149
+```
+
+**Editar Nginx:**
+
+```bash
+sudo nano /etc/nginx/sites-available/gt-turing
+```
+
+**Reemplazar TODO el contenido con esto:**
+
+```nginx
+# Redirigir HTTP a HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name gt-turing.duckdns.org 54.83.171.149;
+    
+    # Redirigir todo a HTTPS
+    return 301 https://gt-turing.duckdns.org$request_uri;
+}
+
+# Servidor HTTPS principal
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name gt-turing.duckdns.org;
+    
+    # Certificados SSL (Let's Encrypt - los crearemos en el siguiente paso)
+    ssl_certificate /etc/letsencrypt/live/gt-turing.duckdns.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/gt-turing.duckdns.org/privkey.pem;
+    
+    # Configuración SSL moderna
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # HSTS (HTTP Strict Transport Security)
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    
+    # Seguridad adicional
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    # Logs
+    access_log /var/log/nginx/gt-turing-access.log;
+    error_log /var/log/nginx/gt-turing-error.log;
+    
+    # Frontend Next.js
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Backend API
+    location /api/ {
+        proxy_pass http://localhost:5021/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # WebSocket para Chat (SignalR)
+    location /ws/ {
+        proxy_pass http://localhost:5021/ws/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket timeouts largos
+        proxy_connect_timeout 7d;
+        proxy_send_timeout 7d;
+        proxy_read_timeout 7d;
+    }
+    
+    # Swagger
+    location /swagger {
+        proxy_pass http://localhost:5021/swagger;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Archivos estáticos de Next.js
+    location /_next/static/ {
+        proxy_pass http://localhost:3000/_next/static/;
+        add_header Cache-Control "public, max-age=3600, immutable";
+    }
+    
+    # Favicon
+    location = /favicon.ico {
+        proxy_pass http://localhost:3000/favicon.ico;
+        access_log off;
+        log_not_found off;
+    }
+}
+```
+
+**Guardar:** `Ctrl + O` → `Enter` → `Ctrl + X`
+
+### Paso 18.5: Instalar Certbot (para SSL gratis de Let's Encrypt)
+
+```bash
+# Instalar Certbot
+sudo apt update
+sudo apt install -y certbot python3-certbot-nginx
+
+# Verificar instalación
+certbot --version
+```
+
+### Paso 18.6: Generar certificado SSL GRATUITO y VÁLIDO
+
+⚠️ **IMPORTANTE:** Si `certbot` falla con error DNS SERVFAIL, usa primero el certificado autofirmado (Paso 18.6.1) y reintenta Let's Encrypt más tarde (Paso 18.6.2).
+
+#### Paso 18.6.1: Configuración temporal con certificado autofirmado
+
+```bash
+# Actualizar Nginx para usar certificado autofirmado temporalmente
+sudo tee /etc/nginx/sites-available/gt-turing > /dev/null <<'EOF'
+# Redirigir HTTP a HTTPS (excepto Let's Encrypt)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name gt-turing.duckdns.org 54.83.171.149;
+    
+    # Permitir validación de Let's Encrypt
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+    
+    # Redirigir todo lo demás a HTTPS
+    location / {
+        return 301 https://gt-turing.duckdns.org$request_uri;
+    }
+}
+
+# Servidor HTTPS principal
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name gt-turing.duckdns.org;
+    
+    # Certificados SSL temporales (autofirmado)
+    ssl_certificate /etc/nginx/ssl/gt-turing.crt;
+    ssl_certificate_key /etc/nginx/ssl/gt-turing.key;
+    
+    # Configuración SSL moderna
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Logs
+    access_log /var/log/nginx/gt-turing-access.log;
+    error_log /var/log/nginx/gt-turing-error.log;
+    
+    # Frontend Next.js
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Backend API
+    location /api/ {
+        proxy_pass http://localhost:5021/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Swagger
+    location /swagger {
+        proxy_pass http://localhost:5021/swagger;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+# Probar configuración
+sudo nginx -t
+
+# Reiniciar Nginx
+sudo systemctl restart nginx
+```
+
+**Ahora puedes acceder a:**
+```
+https://gt-turing.duckdns.org
+```
+
+⚠️ Verás advertencia de seguridad (certificado autofirmado) - acéptala temporalmente.
+
+#### Paso 18.6.2: Obtener certificado Let's Encrypt válido (después de 30 minutos)
+
+**Espera 30-60 minutos** para que el DNS se propague completamente a todos los servidores.
+
+Luego ejecuta:
+
+```bash
+# Generar certificado SSL con Let's Encrypt
+sudo certbot --nginx -d gt-turing.duckdns.org
+
+# Durante el proceso:
+# 1. Email: Introduce tu email (para avisos de renovación)
+# 2. Términos: (A)gree
+# 3. Compartir email con EFF: (Y)es o (N)o (da igual)
+```
+
+**Certbot hará AUTOMÁTICAMENTE:**
+- ✅ Verificar que `gt-turing.duckdns.org` apunta a tu servidor
+- ✅ Generar certificado SSL válido (gratis)
+- ✅ Actualizar Nginx con el certificado (reemplazará el autofirmado)
+- ✅ Configurar renovación automática cada 90 días
+
+⏱️ **Tiempo:** 30-60 segundos
+
+**Si certbot sigue fallando**, usa el método standalone:
+
+```bash
+# Detener nginx temporalmente
+sudo systemctl stop nginx
+
+# Método standalone (más confiable)
+sudo certbot certonly --standalone -d gt-turing.duckdns.org
+
+# Actualizar Nginx manualmente para usar los certificados
+sudo nano /etc/nginx/sites-available/gt-turing
+# Cambiar las líneas de certificados a:
+# ssl_certificate /etc/letsencrypt/live/gt-turing.duckdns.org/fullchain.pem;
+# ssl_certificate_key /etc/letsencrypt/live/gt-turing.duckdns.org/privkey.pem;
+
+# Reiniciar nginx
+sudo systemctl start nginx
+```
+
+### Paso 18.7: Verificar certificado SSL
+
+```bash
+# Ver certificados instalados
+sudo certbot certificates
+
+# Deberías ver:
+# Certificate Name: gt-turing.duckdns.org
+#   Domains: gt-turing.duckdns.org
+#   Expiry Date: [3 meses desde hoy]
+#   Certificate Path: /etc/letsencrypt/live/gt-turing.duckdns.org/fullchain.pem
+```
+
+✅ **Certificado válido creado!**
+
+### Paso 18.8: Actualizar variables de entorno del backend
+
+```bash
+# Editar appsettings.Production.json
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing-backend/gt-turing-backend
+nano appsettings.Production.json
+```
+
+**Actualizar la sección CORS (líneas 17-23):**
+
+```json
+  "Cors": {
+    "AllowedOrigins": [
+      "https://gt-turing.duckdns.org",
+      "http://54.83.171.149:3000",
+      "http://localhost:3000"
+    ]
+  }
+```
+
+**Guardar:** `Ctrl + O` → `Enter` → `Ctrl + X`
+
+### Paso 18.9: Actualizar variables de entorno del frontend
+
+```bash
+# Editar .env.production
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing
+nano .env.production
+```
+
+**Cambiar por:**
+
+```bash
+NEXT_PUBLIC_API_URL=https://gt-turing.duckdns.org/api
+```
+
+**Guardar:** `Ctrl + O` → `Enter` → `Ctrl + X`
+
+### Paso 18.10: Reconstruir y reiniciar todo
+
+```bash
+# Reconstruir frontend con la nueva URL
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing
+rm -rf .next
+npm run build
+
+# Reiniciar todos los servicios
+sudo systemctl restart gt-turing-backend
+sudo systemctl restart gt-turing-frontend
+sudo systemctl restart nginx
+
+# Verificar que todo funciona
+sudo systemctl status gt-turing-backend
+sudo systemctl status gt-turing-frontend
+sudo systemctl status nginx
+```
+
+### Paso 18.11: ¡PROBAR TU APLICACIÓN CON SSL VÁLIDO!
+
+**Abre tu navegador y accede a:**
+
+```
+https://gt-turing.duckdns.org
+```
+
+✅ **¡SIN ADVERTENCIAS DE SEGURIDAD!** 🎉
+
+**Verás el candado 🔒 verde en la barra de direcciones**
+
+**Probar todas las funcionalidades:**
+
+1. **Login:**
+   ```
+   https://gt-turing.duckdns.org/login
+   ```
+   - Email: `admin@gt-turing.com`
+   - Password: `Admin123!`
+
+2. **Ver coches:**
+   ```
+   https://gt-turing.duckdns.org/cars
+   ```
+
+3. **Ver circuitos:**
+   ```
+   https://gt-turing.duckdns.org/circuits
+   ```
+
+4. **Dashboard:**
+   ```
+   https://gt-turing.duckdns.org/dashboard
+   ```
+
+5. **Swagger API:**
+   ```
+   https://gt-turing.duckdns.org/swagger
+   ```
+
+### Paso 18.12: Verificar renovación automática del certificado
+
+Let's Encrypt genera certificados válidos por **90 días**. Certbot configuró la renovación automática.
+
+```bash
+# Verificar que está configurado
+sudo systemctl status certbot.timer
+
+# Debería estar: active (running)
+
+# Probar renovación (no renueva realmente, solo prueba)
+sudo certbot renew --dry-run
+
+# Si todo OK: "Congratulations, all simulated renewals succeeded"
+```
+
+✅ **El certificado se renovará automáticamente cada 90 días**
+
+### Paso 18.13: Verificar la calidad del SSL
+
+Visita esta web para evaluar tu SSL:
+
+```
+https://www.ssllabs.com/ssltest/analyze.html?d=gt-turing.duckdns.org
+```
+
+**Deberías obtener calificación A o A+** ✅
+
+---
+
+### RESUMEN - Paso 18 completado:
+
+✅ **Dominio gratuito:** `gt-turing.duckdns.org`  
+✅ **SSL válido:** Let's Encrypt (renovación automática)  
+✅ **Sin advertencias:** Certificado reconocido por todos los navegadores  
+✅ **100% Gratis:** DuckDNS y Let's Encrypt son gratuitos siempre  
+
+**URLs finales:**
+
+```
+🌐 Aplicación:  https://gt-turing.duckdns.org
+🔧 API:         https://gt-turing.duckdns.org/api
+📚 Swagger:     https://gt-turing.duckdns.org/swagger
+💬 WebSocket:   wss://gt-turing.duckdns.org/ws
+```
+
+---
+
+## 18. OPTIMIZACIONES DE PRODUCCIÓN
+
+### Paso 18.1: Configurar caché de Nginx
+
+```bash
+# Editar configuración principal de Nginx
+sudo nano /etc/nginx/nginx.conf
+```
+
+**Agregar dentro del bloque `http {}`:**
+```nginx
+# Cache para archivos estáticos
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=static_cache:10m max_size=100m inactive=60m use_temp_path=off;
+
+# Compresión Gzip
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_types text/plain text/css text/xml text/javascript application/json application/javascript application/xml+rss application/rss+xml font/truetype font/opentype application/vnd.ms-fontobject image/svg+xml;
+```
+
+**Guardar y reiniciar:**
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### Paso 18.2: Configurar límites de rate limiting
+
+**Para proteger contra ataques DDoS:**
+
+```bash
+sudo nano /etc/nginx/sites-available/gt-turing
+```
+
+**Agregar al inicio del archivo:**
+```nginx
+# Limitar peticiones por IP
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=100r/m;
+limit_req_zone $binary_remote_addr zone=general_limit:10m rate=200r/m;
+```
+
+**Dentro de `location /api/`:**
+```nginx
+limit_req zone=api_limit burst=20 nodelay;
+```
+
+### Paso 18.3: Configurar logs rotación
+
+```bash
+# Crear configuración de logrotate
+sudo nano /etc/logrotate.d/gt-turing
+```
+
+```
+/var/log/nginx/gt-turing-*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 www-data adm
+    sharedscripts
+    postrotate
+        if [ -f /var/run/nginx.pid ]; then
+            kill -USR1 `cat /var/run/nginx.pid`
+        fi
+    endscript
+}
+```
+
+### Paso 18.4: Monitoreo con scripts automáticos
+
+**Crear script de health check:**
+
+```bash
+nano ~/health-check.sh
+```
+
+```bash
+#!/bin/bash
+
+# Health check para GT-TURING
+echo "=== GT-TURING Health Check ==="
+date
+
+# Backend
+if curl -s http://localhost:5021/api/cars > /dev/null; then
+    echo "✅ Backend: OK"
+else
+    echo "❌ Backend: FAIL"
+    sudo systemctl restart gt-turing-backend
+fi
+
+# Frontend
+if curl -s http://localhost:3000 > /dev/null; then
+    echo "✅ Frontend: OK"
+else
+    echo "❌ Frontend: FAIL"
+    sudo systemctl restart gt-turing-frontend
+fi
+
+# Nginx
+if curl -s http://localhost > /dev/null; then
+    echo "✅ Nginx: OK"
+else
+    echo "❌ Nginx: FAIL"
+    sudo systemctl restart nginx
+fi
+
+# Espacio en disco
+DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+if [ $DISK_USAGE -gt 80 ]; then
+    echo "⚠️ Disco al ${DISK_USAGE}%"
+else
+    echo "✅ Disco: ${DISK_USAGE}%"
+fi
+
+# Memoria
+MEM_USAGE=$(free | awk 'NR==2 {printf "%.0f", $3*100/$2}')
+if [ $MEM_USAGE -gt 90 ]; then
+    echo "⚠️ Memoria al ${MEM_USAGE}%"
+else
+    echo "✅ Memoria: ${MEM_USAGE}%"
+fi
+```
+
+**Hacer ejecutable:**
+```bash
+chmod +x ~/health-check.sh
+```
+
+**Programar ejecución cada 5 minutos:**
+```bash
+crontab -e
+```
+
+**Agregar:**
+```
+*/5 * * * * /home/ubuntu/health-check.sh >> /home/ubuntu/health-check.log 2>&1
+```
+
+### Paso 18.5: Backup automático de base de datos
+
+```bash
+nano ~/backup-db.sh
+```
+
+```bash
+#!/bin/bash
+
+# Directorio de backups
+BACKUP_DIR="/home/ubuntu/backups"
+mkdir -p $BACKUP_DIR
+
+# Fecha actual
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Hacer backup
+cp /var/www/gt-turing-backend/gt_turing.db $BACKUP_DIR/gt_turing_$DATE.db
+
+# Comprimir
+gzip $BACKUP_DIR/gt_turing_$DATE.db
+
+# Eliminar backups antiguos (mantener últimos 7 días)
+find $BACKUP_DIR -name "gt_turing_*.db.gz" -mtime +7 -delete
+
+echo "Backup completado: gt_turing_$DATE.db.gz"
+```
+
+**Hacer ejecutable:**
+```bash
+chmod +x ~/backup-db.sh
+```
+
+**Programar backup diario a las 3 AM:**
+```bash
+crontab -e
+```
+
+**Agregar:**
+```
+0 3 * * * /home/ubuntu/backup-db.sh >> /home/ubuntu/backup.log 2>&1
+```
+
+---
+
+## 19. SEGURIDAD ADICIONAL
+
+### Paso 19.1: Configurar Fail2Ban
+
+**Protege contra intentos de login SSH:**
+
+```bash
+# Instalar Fail2Ban
+sudo apt install -y fail2ban
+
+# Copiar configuración
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+
+# Editar configuración
+sudo nano /etc/fail2ban/jail.local
+```
+
+**Configuración recomendada:**
+```ini
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+port = 22
+logpath = /var/log/auth.log
+
+[nginx-http-auth]
+enabled = true
+port = http,https
+logpath = /var/log/nginx/*error.log
+
+[nginx-limit-req]
+enabled = true
+port = http,https
+logpath = /var/log/nginx/*error.log
+maxretry = 10
+```
+
+**Iniciar Fail2Ban:**
+```bash
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+
+# Ver estado
+sudo fail2ban-client status
+```
+
+### Paso 19.2: Deshabilitar login root por SSH
+
+```bash
+# Editar configuración SSH
+sudo nano /etc/ssh/sshd_config
+```
+
+**Cambiar:**
+```
+PermitRootLogin no
+PasswordAuthentication no
+```
+
+**Reiniciar SSH:**
+```bash
+sudo systemctl restart sshd
+```
+
+### Paso 19.3: Configurar AWS Security Group avanzado
+
+En la consola de AWS EC2 → Security Groups:
+
+**Reglas recomendadas:**
+```
+SSH (22):        Solo desde tu IP específica
+HTTP (80):       Anywhere (redirige a HTTPS)
+HTTPS (443):     Anywhere
+Puerto 3000:     ELIMINAR (usar solo Nginx)
+Puerto 5021:     ELIMINAR (usar solo Nginx)
+```
+
+---
+
+## 🎯 CHECKLIST FINAL
+
+### ✅ Verificación completa del despliegue:
+
+- [ ] **Instancia EC2 funcionando**
+  - Estado: Running
+  - IP Elástica asignada: 54.83.171.149
+
+- [ ] **Dominio configurado** (si aplica)
+  - DNS apuntando a la IP
+  - Propagación completada
+
+- [ ] **Certificado SSL válido**
+  - HTTPS funcionando sin advertencias
+  - Renovación automática configurada
+
+- [ ] **Backend funcionando**
+  - Servicio activo: `sudo systemctl status gt-turing-backend`
+  - API respondiendo: `curl http://localhost:5021/api/cars`
+  - Swagger accesible: https://gt-turing.com/swagger
+
+- [ ] **Frontend funcionando**
+  - Servicio activo: `sudo systemctl status gt-turing-frontend`
+  - Página cargando: https://gt-turing.com
+  - Sin errores en consola del navegador
+
+- [ ] **Nginx configurado**
+  - Proxy reverso funcionando
+  - Redirecciones correctas (HTTP→HTTPS, www→sin www)
+  - WebSocket para chat funcionando
+
+- [ ] **Base de datos**
+  - SQLite creada y seedeada
+  - Datos de prueba disponibles
+  - Backups automáticos configurados
+
+- [ ] **Seguridad**
+  - Security Group configurado
+  - Firewall UFW activo
+  - Fail2Ban configurado
+  - SSH protegido (solo clave, no password)
+
+- [ ] **Monitoreo**
+  - Health check ejecutándose
+  - Logs rotando correctamente
+  - Alertas configuradas (opcional)
+
+- [ ] **Funcionalidades probadas**
+  - [ ] Registro de usuario
+  - [ ] Login (admin y usuario normal)
+  - [ ] Ver coches
+  - [ ] Ver circuitos
+  - [ ] Crear reserva
+  - [ ] Dashboard
+  - [ ] Panel de admin
+  - [ ] Chat en tiempo real
+
+---
+
+## 📊 URLs FINALES
+
+### Con dominio personalizado:
+```
+🌐 Frontend:          https://gt-turing.com
+📱 Frontend (www):    https://www.gt-turing.com (redirige a sin www)
+🔧 API:               https://gt-turing.com/api
+📚 Swagger:           https://gt-turing.com/swagger
+💬 WebSocket Chat:    wss://gt-turing.com/ws
+```
+
+### Sin dominio (solo IP):
+```
+🌐 Frontend:          http://54.83.171.149:3000
+🔧 API:               http://54.83.171.149:5021/api
+📚 Swagger:           http://54.83.171.149:5021/swagger
+```
+
+### Acceso SSH:
+```bash
+ssh -i ~/.ssh/labsuser.pem ubuntu@54.83.171.149
+```
+
+---
+
+## 🆘 COMANDOS ÚTILES DE REFERENCIA RÁPIDA
+
+### Servicios:
+```bash
+# Ver estado de todos los servicios
+sudo systemctl status gt-turing-backend gt-turing-frontend nginx
+
+# Reiniciar todo
+sudo systemctl restart gt-turing-backend gt-turing-frontend nginx
+
+# Ver logs en tiempo real
+sudo journalctl -u gt-turing-backend -f
+sudo journalctl -u gt-turing-frontend -f
+sudo tail -f /var/log/nginx/error.log
+```
+
+### Base de datos:
+```bash
+# Ver tablas
+sqlite3 /var/www/gt-turing-backend/gt_turing.db ".tables"
+
+# Ver usuarios
+sqlite3 /var/www/gt-turing-backend/gt_turing.db "SELECT * FROM Users;"
+
+# Backup manual
+cp /var/www/gt-turing-backend/gt_turing.db ~/backup_$(date +%Y%m%d).db
+```
+
+### Actualizar código:
+```bash
+# Pull cambios
+cd /var/www/proyectosintegrados-Juanjotg65
+git pull origin main
+
+# Backend
+cd gt-turing-backend/gt-turing-backend
+dotnet publish -c Release -o /var/www/gt-turing-backend
+sudo systemctl restart gt-turing-backend
+
+# Frontend
+cd /var/www/proyectosintegrados-Juanjotg65/gt-turing
+npm install
+npm run build
+sudo systemctl restart gt-turing-frontend
+```
+
+### Nginx:
+```bash
+# Probar configuración
+sudo nginx -t
+
+# Recargar sin downtime
+sudo systemctl reload nginx
+
+# Ver sitios activos
+ls -la /etc/nginx/sites-enabled/
+```
+
+### Certificados SSL:
+```bash
+# Ver certificados
+sudo certbot certificates
+
+# Renovar manualmente
+sudo certbot renew
+
+# Probar renovación
+sudo certbot renew --dry-run
+```
+
+### Monitoreo:
+```bash
+# Uso de recursos
+htop
+
+# Espacio en disco
+df -h
+
+# Memoria
+free -h
+
+# Procesos de la app
+ps aux | grep -E 'dotnet|node|nginx'
+
+# Conexiones activas
+sudo netstat -tulpn | grep -E '3000|5021|80|443'
+```
+
+---
+
+## 🎓 PRÓXIMOS PASOS RECOMENDADOS
+
+### Para mejorar el proyecto:
+
+1. **CDN (CloudFront):**
+   - Configurar AWS CloudFront para servir assets estáticos
+   - Mejorar velocidad de carga global
+
+2. **Base de datos externa:**
+   - Migrar de SQLite a PostgreSQL en AWS RDS
+   - Mayor rendimiento y escalabilidad
+
+3. **CI/CD:**
+   - GitHub Actions para deploy automático
+   - Tests automáticos antes de desplegar
+
+4. **Monitoreo avanzado:**
+   - AWS CloudWatch para métricas
+   - Alertas por email/SMS
+
+5. **Auto-scaling:**
+   - Load Balancer con múltiples instancias
+   - Escalar automáticamente según tráfico
+
+6. **Docker:**
+   - Containerizar la aplicación
+   - Facilitar deployments
+
+7. **Staging environment:**
+   - Crear un entorno de pruebas separado
+   - Probar antes de producción
+
+---
+
 **Autor:** GT-TURING Team  
 **Fecha:** Diciembre 2025  
-**Versión:** 1.0
+**Versión:** 2.0  
+**Última actualización:** Configuración completa con dominio y SSL

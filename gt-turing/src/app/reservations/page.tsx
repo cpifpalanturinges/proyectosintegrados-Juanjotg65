@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -15,7 +15,7 @@ import TimePicker from '@/components/TimePicker';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { useToast } from '@/components/Toast';
 
-export default function NewReservationPage() {
+function ReservationContent() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const { t } = useLanguage();
@@ -461,5 +461,13 @@ export default function NewReservationPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function NewReservationPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <ReservationContent />
+    </Suspense>
   );
 }
